@@ -37,11 +37,11 @@ export class ScoringService {
             resumeId: resume.id,
             fileName: resume.fileName,
             overallScore: resume.truthScore,
-            sessions: sessions.map(session => ({
+            sessions: sessions.map((session: any) => ({
                 sessionId: session.id,
                 completedAt: session.completedAt,
                 overallScore: session.overallScore || null,
-                skillScores: session.skillScores.map(ss => ({
+                skillScores: session.skillScores.map((ss: any) => ({
                     skillName: ss.skill.name,
                     mcqScore: ss.mcqScore,
                     subjectiveScore: ss.subjScore,
@@ -64,14 +64,14 @@ export class ScoringService {
         });
 
         const averageScore = resumes.length > 0
-            ? resumes.reduce((acc, r) => acc + (r.truthScore?.authenticityScore || 0), 0) / resumes.length
+            ? resumes.reduce((acc: number, r: any) => acc + (r.truthScore?.authenticityScore || 0), 0) / resumes.length
             : 0;
 
         return {
             totalResumes: resumes.length,
             completedAssessments: completedSessions,
             averageAuthenticityScore: Math.round(averageScore * 100) / 100,
-            resumes: resumes.map(r => ({
+            resumes: resumes.map((r: any) => ({
                 id: r.id,
                 fileName: r.fileName,
                 score: r.truthScore?.authenticityScore || 0,

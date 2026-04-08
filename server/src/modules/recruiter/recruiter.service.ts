@@ -50,7 +50,7 @@ export class RecruiterService {
             orderBy: { createdAt: 'desc' }
         });
 
-        return candidates.map(c => {
+        return candidates.map((c: any) => {
             const latestResume = c.resumes[0];
             return {
                 id: c.id,
@@ -58,7 +58,7 @@ export class RecruiterService {
                 email: c.email,
                 latestResumeId: latestResume?.id,
                 truthScore: latestResume?.truthScore?.authenticityScore,
-                skills: latestResume?.resumeSkills.map(rs => rs.skill.name).slice(0, 5) || []
+                skills: latestResume?.resumeSkills.map((rs: any) => rs.skill.name).slice(0, 5) || []
             };
         });
     }
@@ -110,7 +110,7 @@ export class RecruiterService {
                 id: latestResume.id,
                 fileName: latestResume.fileName,
                 truthScore: latestResume.truthScore,
-                skills: latestResume.resumeSkills.map(rs => ({
+                skills: latestResume.resumeSkills.map((rs: any) => ({
                     name: rs.skill.name,
                     category: rs.skill.category.name,
                     claimedLevel: rs.claimedLevel,
@@ -201,7 +201,7 @@ export class RecruiterService {
             }
         });
 
-        return shortlist.map(s => ({
+        return shortlist.map((s: any) => ({
             ...s,
             candidate: {
                 id: s.candidate.id,

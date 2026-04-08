@@ -33,7 +33,7 @@ export class RoomService {
                 durationLimit: options?.durationLimit,
                 strictProctoring: options?.strictProctoring ?? false,
                 participants: {
-                    create: candidates.map(c => ({
+                    create: candidates.map((c: any) => ({
                         userId: c.id,
                     })),
                 },

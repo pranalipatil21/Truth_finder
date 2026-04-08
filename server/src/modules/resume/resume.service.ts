@@ -196,7 +196,7 @@ export class ResumeService {
       },
     });
 
-    return skills.map(rs => ({
+    return skills.map((rs: any) => ({
       id: rs.skill.id,
       name: rs.skill.name,
       category: rs.skill.category.name,

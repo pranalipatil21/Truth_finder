@@ -389,13 +389,13 @@ export class AssessmentService {
       questionsBySkill[rs.skill.id] = {
         skillName: rs.skill.name,
         targetCount: countForThisSkill + (hasSubjective ? 1 : 0),
-        mcqs: mcqs.map(q => ({
+        mcqs: mcqs.map((q: any) => ({
           id: q.id,
           promptText: q.promptText,
           options: Array.isArray(q.options) ? (q.options as any[]).map((o: any) => ({ text: o.text })) : [], // Hide correct answer
           difficulty: q.difficulty,
         })),
-        subjective: subjective.map(q => ({
+        subjective: subjective.map((q: any) => ({
           id: q.id,
           promptText: q.promptText,
           difficulty: q.difficulty,
@@ -746,7 +746,7 @@ export class AssessmentService {
       sessionId: session.id,
       status: session.status,
       completedAt: session.completedAt,
-      skillScores: session.skillScores.map(ss => ({
+      skillScores: session.skillScores.map((ss: any) => ({
         skillName: ss.skill.name,
         mcqScore: ss.mcqScore,
         subjectiveScore: ss.subjScore,
