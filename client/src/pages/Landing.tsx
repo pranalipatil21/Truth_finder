@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { useRef, useState } from 'react';
-import { ArrowRight, ShieldCheck, UserCheck, Zap, CheckCircle, Sparkles } from 'lucide-react';
+import { useRef } from 'react';
+import { ArrowRight, ShieldCheck, UserCheck, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 /* ─── Steps Data ─── */

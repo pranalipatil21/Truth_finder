@@ -16,7 +16,7 @@ export function CreateRoomPage() {
     const [startTime, setStartTime] = useState('');
     const [deadline, setDeadline] = useState('');
     const [durationLimit, setDurationLimit] = useState<number>(60);
-    const [strictProctoring, setStrictProctoring] = useState(false);
+    const [strictProctoring] = useState(false);
 
     const { data: shortlisted, isLoading } = useQuery({
         queryKey: ['shortlisted-candidates'],

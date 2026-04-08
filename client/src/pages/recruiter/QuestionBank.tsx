@@ -5,7 +5,7 @@ import { recruiterApi } from '@/api/recruiter.api';
 import { adminApi } from '@/api/admin.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Plus, Trash2, BookOpen, ChevronDown, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, BookOpen, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
 type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
