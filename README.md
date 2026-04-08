@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Truth Finder — AI-Powered Resume Verification & Adaptive Assessment Platform
 
 Truth Finder is an AI-powered platform designed to verify candidates' technical skills by comparing their resume claims with their demonstrated performance in dynamically generated technical assessments.
@@ -105,6 +104,7 @@ The platform parses a candidate's resume using LLMs, extracts claimed technical 
                         │  MongoDB    │
                         │   Prisma    │
                         └─────────────┘
+```
 =======
 # Turth_Finder
->>>>>>> 3b24eb5 (first commit)
+>>>>>>> 7d8f801 (first commit)
