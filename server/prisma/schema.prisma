@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String              @id @default(auto()) @map("_id") @db.ObjectId
+  email                 String              @unique
+  passwordHash          String?
+  name                  String
+  role                  UserRole            @default(CANDIDATE)
+  provider              AuthProvider        @default(LOCAL)
+  providerId            String?
+  isActive              Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  assessmentSessions    AssessmentSession[]
+  refreshTokens         RefreshToken[]
+  resumes               Resume[]
+  shortlistsAsCandidate Shortlist[]         @relation("CandidateShortlists")
+  shortlistsAsRecruiter Shortlist[]         @relation("RecruiterShortlists")
+  assessmentRooms       AssessmentRoom[]
+  roomParticipations    RoomParticipant[]
+  recruiterQuestions    Question[]          @relation("RecruiterQuestions")
+
+  @@index([provider, providerId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String   @db.ObjectId
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model SkillCategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  skills      Skill[]
+
+  @@map("skill_categories")
+}
+
+model Skill {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String        @unique
+  categoryId   String        @db.ObjectId
+  description  String?
+  createdAt    DateTime      @default(now())
+  questions    Question[]
+  resumeSkills ResumeSkill[]
+  skillScores  SkillScore[]
+  category     SkillCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@map("skills")
+}
+
+model Resume {
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String              @db.ObjectId
+  fileName           String
+  filePath           String
+  rawText            String?
+  status             ResumeStatus        @default(UPLOADED)
+  parsedAt           DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  assessmentSessions AssessmentSession[]
+  resumeSkills       ResumeSkill[]
+  truthScore         ResumeTruthScore?
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("resumes")
+}
+
+model ResumeSkill {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  resumeId        String     @db.ObjectId
+  skillId         String     @db.ObjectId
+  claimedLevel    SkillLevel @default(INTERMEDIATE)
+  yearsExperience Float?
+  extractedAt     DateTime   @default(now())
+  resume          Resume     @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  skill           Skill      @relation(fields: [skillId], references: [id])
+
+  @@unique([resumeId, skillId])
+  @@index([resumeId])
+  @@index([skillId])
+  @@map("resume_skills")
+}
+
+model Question {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  skillId        String          @db.ObjectId
+  type           QuestionType
+  difficulty     Difficulty      @default(MEDIUM)
+  promptText     String
+  options        Json?
+  correctOption  Int?
+  source         QuestionSource  @default(AI_GENERATED)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  // Recruiter Question Bank fields (null for standard AI/admin questions)
+  recruiterId    String?         @db.ObjectId
+  roomId         String?         @db.ObjectId
+  skill          Skill           @relation(fields: [skillId], references: [id])
+  recruiter      User?           @relation("RecruiterQuestions", fields: [recruiterId], references: [id], onDelete: Cascade)
+  room           AssessmentRoom? @relation("RoomQuestionBank", fields: [roomId], references: [id], onDelete: Cascade)
+  sessionAnswers SessionAnswer[]
+
+  @@index([skillId])
+  @@index([type])
+  @@index([difficulty])
+  @@index([roomId])
+  @@index([recruiterId])
+  @@map("questions")
+}
+
+model AssessmentSession {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String          @db.ObjectId
+  resumeId       String          @db.ObjectId
+  status         SessionStatus   @default(PENDING)
+  timeLimitSecs  Int             @default(3600)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  selectedSkills Json?
+  overallScore   Float?
+  violationCount Int             @default(0)
+  tabSwitchCount Int             @default(0)
+  participantId  String?           @db.ObjectId
+  resume         Resume            @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participant    RoomParticipant?  @relation(fields: [participantId], references: [id])
+  sessionAnswers SessionAnswer[]
+  skillScores    SkillScore[]
+  snapshots      AssessmentSnapshot[]
+
+  @@index([userId])
+  @@index([resumeId])
+  @@index([status])
+  @@map("assessment_sessions")
+}
+
+model AssessmentSnapshot {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String   @db.ObjectId
+  imageUrl    String   
+  capturedAt  DateTime @default(now())
+  session     AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("assessment_snapshots")
+}
+
+model SessionAnswer {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId       String            @db.ObjectId
+  questionId      String            @db.ObjectId
+  candidateAnswer String?
+  selectedOption  Int?
+  isCorrect       Boolean?
+  aiEvalScore     Float?
+  aiEvalFeedback  String?
+  answeredAt      DateTime          @default(now())
+  question        Question          @relation(fields: [questionId], references: [id])
+  session         AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, questionId])
+  @@index([sessionId])
+  @@index([questionId])
+  @@map("session_answers")
+}
+
+model SkillScore {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId  String            @db.ObjectId
+  skillId    String            @db.ObjectId
+  mcqScore   Float?
+  subjScore  Float?
+  truthScore Float
+  computedAt DateTime          @default(now())
+  session    AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  skill      Skill             @relation(fields: [skillId], references: [id])
+
+  @@unique([sessionId, skillId])
+  @@index([sessionId])
+  @@index([skillId])
+  @@map("skill_scores")
+}
+
+model AssessmentRoom {
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  recruiterId      String            @db.ObjectId
+  name             String
+  roomCode         String            @unique
+  status           RoomStatus        @default(ACTIVE)
+  startTime        DateTime?         // New explicit schedule boundary
+  deadline         DateTime?         // New explicit cutoff boundary
+  durationLimit    Int?              // Duration in minutes
+  strictProctoring Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  recruiter        User              @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  participants     RoomParticipant[]
+  questionBank     Question[]        @relation("RoomQuestionBank")
+
+  @@index([recruiterId])
+  @@map("assessment_rooms")
+}
+
+model RoomParticipant {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  roomId      String            @db.ObjectId
+  userId      String            @db.ObjectId
+  joinedAt    DateTime          @default(now())
+  room        AssessmentRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions    AssessmentSession[]
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_participants")
+}
+
+model ResumeTruthScore {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  resumeId          String   @unique @db.ObjectId
+  authenticityScore Float
+  breakdown         Json
+  computedAt        DateTime @default(now())
+  resume            Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@map("resume_truth_scores")
+}
+
+enum RoomStatus {
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+model Shortlist {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  recruiterId String   @db.ObjectId
+  candidateId String   @db.ObjectId
+  notes       String?
+  createdAt   DateTime @default(now())
+  candidate   User     @relation("CandidateShortlists", fields: [candidateId], references: [id], onDelete: Cascade)
+  recruiter   User     @relation("RecruiterShortlists", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  @@unique([recruiterId, candidateId])
+  @@index([recruiterId])
+  @@index([candidateId])
+  @@map("shortlists")
+}
+
+enum UserRole {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  GITHUB
+}
+
+enum ResumeStatus {
+  UPLOADED
+  PARSING
+  PARSED
+  FAILED
+}
+
+enum SessionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  TIMED_OUT
+  ABANDONED
+}
+
+enum QuestionType {
+  MCQ
+  SUBJECTIVE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  EXPERT
+}
+
+enum QuestionSource {
+  AI_GENERATED
+  MANUAL
+  RECRUITER
+}
