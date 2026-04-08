@@ -110,17 +110,17 @@ export class AdminService {
         ]);
 
         // Fetch skill names for top skills
-        const skillIds = topSkills.map(s => s.skillId);
+        const skillIds = topSkills.map((s: any) => s.skillId);
         const skills = await prisma.skill.findMany({
             where: { id: { in: skillIds } },
             select: { id: true, name: true },
         });
-        const skillMap = Object.fromEntries(skills.map(s => [s.id, s.name]));
+        const skillMap = Object.fromEntries(skills.map((s: any) => [s.id, s.name]));
 
         // Group sessions by day
         const sessionsByDay: Record<string, number> = {};
         const scoresByDay: Record<string, number[]> = {};
-        recentSessions.forEach(s => {
+        recentSessions.forEach((s: any) => {
             if (!s.completedAt) return;
             const day = s.completedAt.toISOString().split('T')[0];
             sessionsByDay[day] = (sessionsByDay[day] || 0) + 1;
@@ -130,17 +130,17 @@ export class AdminService {
             }
         });
 
-        const dailyStats = Object.entries(sessionsByDay).map(([date, count]) => ({
+        const dailyStats = Object.entries(sessionsByDay).map(([date, count]: [string, number]) => ({
             date,
             assessments: count,
             avgScore: scoresByDay[date]
-                ? Math.round(scoresByDay[date].reduce((a, b) => a + b, 0) / scoresByDay[date].length)
+                ? Math.round(scoresByDay[date].reduce((a: number, b: number) => a + b, 0) / scoresByDay[date].length)
                 : 0,
         }));
 
         // Score distribution buckets
         const distribution: Record<string, number> = { '0-25': 0, '26-50': 0, '51-75': 0, '76-100': 0 };
-        allScores.forEach(s => {
+        allScores.forEach((s: any) => {
             const score = s.overallScore!;
             if (score <= 25) distribution['0-25']++;
             else if (score <= 50) distribution['26-50']++;
@@ -156,7 +156,7 @@ export class AdminService {
                 completedSessions,
                 averageScore: Math.round((avgScoreResult._avg.overallScore || 0) * 100) / 100,
             },
-            topSkills: topSkills.map(s => ({
+            topSkills: topSkills.map((s: any) => ({
                 name: skillMap[s.skillId] || 'Unknown',
                 count: s._count.skillId,
             })),
