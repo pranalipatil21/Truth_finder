@@ -67,11 +67,11 @@ export class AssessmentService {
           distinct: ['skillId']
         });
 
-        const roomSkillIds = new Set(roomSkillsRaw.map(r => r.skillId));
+        const roomSkillIds = new Set(roomSkillsRaw.map((r: any) => r.skillId));
         
         // Build recruiter prioritized list
-        const recruiterSkills = roomSkillsRaw.map(r => {
-          const existing = sortedSkills.find(s => s.skill.id === r.skillId);
+        const recruiterSkills = roomSkillsRaw.map((r: any) => {
+          const existing = sortedSkills.find((s: any) => s.skill.id === r.skillId);
           return { skill: r.skill, claimedLevel: existing ? existing.claimedLevel : 'INTERMEDIATE' };
         });
 
@@ -272,14 +272,14 @@ export class AssessmentService {
       where: { id: { in: selectedSkillsParam } }
     });
 
-    const populatedSkills = selectedSkillsParam.map(skillId => {
-      const skill = skillsList.find(s => s.id === skillId)!;
-      const resSkill = session.resume.resumeSkills.find(rs => rs.skillId === skillId);
+    const populatedSkills = selectedSkillsParam.map((skillId: string) => {
+      const skill = skillsList.find((s: any) => s.id === skillId)!;
+      const resSkill = session.resume.resumeSkills.find((rs: any) => rs.skillId === skillId);
       return {
         skill: skill,
         claimedLevel: resSkill ? resSkill.claimedLevel : 'INTERMEDIATE'
       };
-    }).filter(s => s.skill);
+    }).filter((s: any) => s.skill);
 
     // Determine how many questions per skill originally targeted
     const resumeSkillsCount = populatedSkills.length || 1;
