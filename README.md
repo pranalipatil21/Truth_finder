@@ -1,4 +1,4 @@
-# Truth Finder — AI-Powered Resume Verification & Technical Assessment Platform
+# Truth Finder — AI-Powered Resume Verification & Adaptive Assessment Platform
 
 Truth Finder is an AI-powered platform designed to verify candidates' technical skills by comparing their resume claims with their demonstrated performance in dynamically generated technical assessments.
 
